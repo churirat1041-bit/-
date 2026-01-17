@@ -1,0 +1,557 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>THE ARENA - Premium Football Booking</title>
+    <link href="https://fonts.googleapis.com/css2?family=Prompt:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+    <style>
+        /* --- 1. SETTINGS & VARS --- */
+        :root {
+            --bg-dark: #0f0f0f;
+            --bg-panel: #1a1a1a;
+            --primary-gold: #c5a059;
+            --primary-gold-hover: #e6c885;
+            --text-white: #ffffff;
+            --text-grey: #a0a0a0;
+            --success: #00ff88;
+            --error: #ff4d4d;
+            --glass: rgba(20, 20, 20, 0.85);
+            --border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Prompt', sans-serif;
+        }
+
+        body {
+            background-color: var(--bg-dark);
+            color: var(--text-white);
+            overflow-x: hidden;
+        }
+
+        /* --- 2. NAVBAR (TOP) --- */
+        .navbar {
+            position: fixed;
+            top: 0;
+            width: 100%;
+            height: 80px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0 5%;
+            background: var(--glass);
+            backdrop-filter: blur(10px);
+            z-index: 1000;
+            border-bottom: var(--border);
+        }
+
+        .logo {
+            font-size: 1.8rem;
+            font-weight: 700;
+            color: var(--text-white);
+            letter-spacing: 1px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .logo span { color: var(--primary-gold); }
+
+        .nav-links {
+            display: flex;
+            gap: 30px;
+        }
+
+        .nav-links a {
+            text-decoration: none;
+            color: var(--text-grey);
+            font-weight: 400;
+            font-size: 0.95rem;
+            transition: 0.3s;
+        }
+
+        .nav-links a:hover, .nav-links a.active {
+            color: var(--primary-gold);
+        }
+
+        .btn-login {
+            padding: 10px 25px;
+            border: 1px solid var(--primary-gold);
+            color: var(--primary-gold);
+            background: transparent;
+            border-radius: 50px;
+            cursor: pointer;
+            transition: 0.3s;
+        }
+
+        .btn-login:hover {
+            background: var(--primary-gold);
+            color: #000;
+        }
+
+        /* --- 3. HERO SECTION --- */
+        .hero {
+            height: 80vh;
+            background: linear-gradient(rgba(0,0,0,0.6), rgba(15,15,15,1)), 
+                        url('https://images.unsplash.com/photo-1529900748604-07564a03e7a6?q=80&w=2070&auto=format&fit=crop');
+            background-size: cover;
+            background-position: center;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+            padding-top: 80px;
+        }
+
+        .hero h1 {
+            font-size: 4rem;
+            text-transform: uppercase;
+            margin-bottom: 20px;
+            background: linear-gradient(to right, #fff, #999);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .hero p {
+            font-size: 1.2rem;
+            color: var(--text-grey);
+            max-width: 600px;
+            margin-bottom: 40px;
+        }
+
+        /* Infographic Bar */
+        .info-bar {
+            display: flex;
+            gap: 40px;
+            background: rgba(30,30,30,0.6);
+            padding: 20px 40px;
+            border-radius: 20px;
+            border: var(--border);
+            backdrop-filter: blur(5px);
+        }
+
+        .info-item {
+            text-align: center;
+        }
+        .info-item h3 { font-size: 2rem; color: var(--primary-gold); margin-bottom: 5px; }
+        .info-item span { font-size: 0.8rem; color: var(--text-grey); text-transform: uppercase; letter-spacing: 1px; }
+
+        /* --- 4. BOOKING SECTION --- */
+        .section-title {
+            text-align: center;
+            font-size: 2rem;
+            margin: 60px 0 40px;
+        }
+        .section-title span { color: var(--primary-gold); border-bottom: 2px solid var(--primary-gold); padding-bottom: 10px; }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto 100px;
+            padding: 0 20px;
+        }
+
+        /* Filter Tabs */
+        .tabs {
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+            margin-bottom: 40px;
+        }
+
+        .tab-btn {
+            background: var(--bg-panel);
+            color: var(--text-grey);
+            border: none;
+            padding: 15px 30px;
+            border-radius: 12px;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: 0.3s;
+        }
+
+        .tab-btn.active, .tab-btn:hover {
+            background: var(--primary-gold);
+            color: #000;
+            font-weight: 600;
+            transform: translateY(-3px);
+            box-shadow: 0 10px 20px rgba(197, 160, 89, 0.2);
+        }
+
+        /* Field Cards Layout */
+        .fields-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+            gap: 30px;
+        }
+
+        .field-card {
+            background: var(--bg-panel);
+            border-radius: 20px;
+            overflow: hidden;
+            border: var(--border);
+            transition: 0.3s;
+            position: relative;
+        }
+
+        .field-card:hover {
+            transform: translateY(-10px);
+            border-color: var(--primary-gold);
+            box-shadow: 0 15px 30px rgba(0,0,0,0.5);
+        }
+
+        .field-img {
+            height: 200px;
+            background-color: #333;
+            background-size: cover;
+            background-position: center;
+            position: relative;
+        }
+        
+        .field-badge {
+            position: absolute;
+            top: 15px; right: 15px;
+            background: rgba(0,0,0,0.7);
+            padding: 5px 12px;
+            border-radius: 50px;
+            font-size: 0.8rem;
+            color: var(--primary-gold);
+            border: 1px solid var(--primary-gold);
+        }
+
+        .field-body { padding: 25px; }
+
+        .field-title { font-size: 1.4rem; margin-bottom: 10px; }
+        .field-desc { color: var(--text-grey); font-size: 0.9rem; margin-bottom: 20px; display: flex; align-items: center; gap: 10px; }
+
+        /* Time Slots (Pills) */
+        .slots-container {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 10px;
+        }
+
+        .time-pill {
+            padding: 10px;
+            border-radius: 8px;
+            text-align: center;
+            font-size: 0.9rem;
+            cursor: pointer;
+            border: 1px solid #333;
+            background: #252525;
+            transition: 0.2s;
+            position: relative;
+        }
+
+        /* Available Status */
+        .time-pill.avail {
+            color: var(--text-white);
+        }
+        .time-pill.avail:hover {
+            border-color: var(--success);
+            background: rgba(0, 255, 136, 0.1);
+        }
+
+        /* Booked Status */
+        .time-pill.booked {
+            background: #151515;
+            color: #444;
+            cursor: not-allowed;
+            border-color: transparent;
+        }
+        .time-pill.booked::after {
+            content: 'เต็ม';
+            position: absolute;
+            top: 50%; left: 50%;
+            transform: translate(-50%, -50%);
+            font-size: 0.7rem;
+            color: var(--error);
+            font-weight: bold;
+        }
+
+        /* Price Tag */
+        .price-tag {
+            display: block;
+            font-size: 0.75rem;
+            color: var(--text-grey);
+            margin-top: 3px;
+        }
+        .time-pill:hover .price-tag { color: var(--success); }
+
+        /* --- 5. MODAL (POPUP) --- */
+        .modal-overlay {
+            display: none;
+            position: fixed;
+            top: 0; left: 0;
+            width: 100%; height: 100%;
+            background: rgba(0,0,0,0.9);
+            z-index: 2000;
+            justify-content: center;
+            align-items: center;
+            backdrop-filter: blur(5px);
+        }
+
+        .modal-box {
+            background: #1a1a1a;
+            width: 90%;
+            max-width: 450px;
+            padding: 40px;
+            border-radius: 20px;
+            border: 1px solid var(--primary-gold);
+            position: relative;
+            animation: zoomIn 0.3s ease;
+        }
+
+        @keyframes zoomIn { from {transform: scale(0.9); opacity: 0;} to {transform: scale(1); opacity: 1;} }
+
+        .modal-header h2 { color: var(--primary-gold); margin-bottom: 5px; }
+        .modal-header p { color: var(--text-grey); margin-bottom: 25px; }
+
+        .form-input {
+            width: 100%;
+            padding: 15px;
+            background: #0f0f0f;
+            border: 1px solid #333;
+            color: #fff;
+            border-radius: 10px;
+            margin-bottom: 15px;
+            font-size: 1rem;
+        }
+        .form-input:focus { outline: none; border-color: var(--primary-gold); }
+
+        .btn-submit {
+            width: 100%;
+            padding: 15px;
+            background: var(--primary-gold);
+            color: #000;
+            border: none;
+            border-radius: 10px;
+            font-size: 1.1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: 0.3s;
+        }
+        .btn-submit:hover { background: var(--primary-gold-hover); }
+
+        .close-modal {
+            position: absolute;
+            top: 20px; right: 20px;
+            color: #fff;
+            cursor: pointer;
+            font-size: 1.5rem;
+        }
+
+    </style>
+</head>
+<body>
+
+    <nav class="navbar">
+        <div class="logo">
+            <i class="fa-solid fa-futbol"></i>
+            THE ARENA <span>.FC</span>
+        </div>
+        <div class="nav-links">
+            <a href="#" class="active">หน้าหลัก</a>
+            <a href="#booking">จองสนาม</a>
+            <a href="#">ตรวจสอบสถานะ</a>
+            <a href="#">ติดต่อเรา</a>
+        </div>
+        <button class="btn-login">เข้าสู่ระบบ</button>
+    </nav>
+
+    <section class="hero">
+        <h1>Experience The Next Level</h1>
+        <p>สนามฟุตบอลหญ้าเทียมมาตรฐานระดับโลก พร้อมระบบจองออนไลน์ที่รวดเร็วที่สุด</p>
+        
+        <div class="info-bar">
+            <div class="info-item">
+                <h3>03</h3>
+                <span>Fields Available</span>
+            </div>
+            <div class="info-item" style="border-left: 1px solid #444; border-right: 1px solid #444; padding: 0 40px;">
+                <h3 id="stat-slots">12</h3>
+                <span>Time Slots Left</span>
+            </div>
+            <div class="info-item">
+                <h3>24h</h3>
+                <span>Open Daily</span>
+            </div>
+        </div>
+    </section>
+
+    <div class="container" id="booking">
+        <h2 class="section-title"><span>SELECT YOUR FIELD</span></h2>
+
+        <div class="tabs">
+            <button class="tab-btn active" onclick="filterFields('all', this)">ทั้งหมด</button>
+            <button class="tab-btn" onclick="filterFields('vip', this)">VIP Field (7คน)</button>
+            <button class="tab-btn" onclick="filterFields('pro', this)">Pro Field (11คน)</button>
+        </div>
+
+        <div class="fields-grid" id="fields-container">
+            </div>
+    </div>
+
+    <div class="modal-overlay" id="bookingModal">
+        <div class="modal-box">
+            <i class="fa-solid fa-xmark close-modal" onclick="closeModal()"></i>
+            <div class="modal-header">
+                <h2 id="m-title">Field A - 18:00</h2>
+                <p>กรุณากรอกข้อมูลเพื่อบันทึกการจอง (Save to D3)</p>
+            </div>
+            <form onsubmit="submitBooking(event)">
+                <input type="text" class="form-input" placeholder="ชื่อ-นามสกุล (Name)" required>
+                <input type="tel" class="form-input" placeholder="เบอร์โทรศัพท์ (Phone)" required>
+                <div style="display: flex; justify-content: space-between; margin-bottom: 20px; color: var(--text-grey); font-size: 0.9rem;">
+                    <span>ราคาค่าสนาม</span>
+                    <span id="m-price" style="color: var(--primary-gold);">฿1,200</span>
+                </div>
+                <button type="submit" class="btn-submit">ยืนยันการจอง</button>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        // Mock Data: จำลองข้อมูลจาก Database (D2 File)
+        const fieldsData = [
+            {
+                id: 'F1',
+                type: 'vip',
+                name: 'Arena A (VIP)',
+                desc: 'หญ้าเกรด FIFA 2 ดาว | ขนาด 7 คน',
+                img: 'https://images.unsplash.com/photo-1575361204480-aadea25e6e68?q=80&w=2071&auto=format&fit=crop',
+                slots: [
+                    { time: '17:00-18:00', price: 1200, status: 'booked' },
+                    { time: '18:00-19:00', price: 1200, status: 'avail' },
+                    { time: '19:00-20:00', price: 1500, status: 'avail' },
+                    { time: '20:00-21:00', price: 1500, status: 'booked' }
+                ]
+            },
+            {
+                id: 'F2',
+                type: 'vip',
+                name: 'Arena B (Standard)',
+                desc: 'หญ้า Hybrid นุ่มพิเศษ | ขนาด 7 คน',
+                img: 'https://images.unsplash.com/photo-1459865264687-595d652de67e?q=80&w=2070&auto=format&fit=crop',
+                slots: [
+                    { time: '17:00-18:00', price: 1000, status: 'avail' },
+                    { time: '18:00-19:00', price: 1000, status: 'avail' },
+                    { time: '19:00-20:00', price: 1200, status: 'booked' },
+                    { time: '20:00-21:00', price: 1200, status: 'avail' }
+                ]
+            },
+            {
+                id: 'F3',
+                type: 'pro',
+                name: 'Stadium C (Pro)',
+                desc: 'สนามใหญ่มาตรฐานลีก | ขนาด 11 คน',
+                img: 'https://images.unsplash.com/photo-1556056504-5c7696c4c28d?q=80&w=2076&auto=format&fit=crop',
+                slots: [
+                    { time: '18:00-20:00', price: 3500, status: 'avail' },
+                    { time: '20:00-22:00', price: 3500, status: 'avail' }
+                ]
+            }
+        ];
+
+        // 1. Render Function
+        function renderFields(filterType) {
+            const container = document.getElementById('fields-container');
+            container.innerHTML = '';
+            
+            let totalAvail = 0;
+
+            fieldsData.forEach(field => {
+                if(filterType !== 'all' && field.type !== filterType) return;
+
+                // Create Slots HTML
+                let slotsHTML = '';
+                field.slots.forEach(slot => {
+                    if(slot.status === 'avail') totalAvail++;
+                    const slotClass = slot.status === 'avail' ? 'avail' : 'booked';
+                    const clickEvent = slot.status === 'avail' ? `onclick="openModal('${field.name}', '${slot.time}', ${slot.price}, this)"` : '';
+                    
+                    slotsHTML += `
+                        <div class="time-pill ${slotClass}" ${clickEvent}>
+                            ${slot.time}
+                            <span class="price-tag">฿${slot.price.toLocaleString()}</span>
+                        </div>
+                    `;
+                });
+
+                // Create Card HTML
+                const card = `
+                    <div class="field-card">
+                        <div class="field-img" style="background-image: url('${field.img}');">
+                            <span class="field-badge">${field.type.toUpperCase()}</span>
+                        </div>
+                        <div class="field-body">
+                            <h3 class="field-title">${field.name}</h3>
+                            <p class="field-desc"><i class="fa-solid fa-users"></i> ${field.desc}</p>
+                            <div class="slots-container">
+                                ${slotsHTML}
+                            </div>
+                        </div>
+                    </div>
+                `;
+                container.innerHTML += card;
+            });
+
+            // Update Infographic Stat
+            document.getElementById('stat-slots').innerText = totalAvail;
+        }
+
+        // 2. Filter Function
+        function filterFields(type, btn) {
+            document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+            btn.classList.add('active');
+            renderFields(type);
+        }
+
+        // 3. Modal Functions
+        let currentSlotRef = null; // Store reference to div to change visual later
+
+        function openModal(fieldName, time, price, element) {
+            const modal = document.getElementById('bookingModal');
+            document.getElementById('m-title').innerText = `${fieldName} | ${time}`;
+            document.getElementById('m-price').innerText = `฿${price.toLocaleString()}`;
+            currentSlotRef = element;
+            modal.style.display = 'flex';
+        }
+
+        function closeModal() {
+            document.getElementById('bookingModal').style.display = 'none';
+        }
+
+        function submitBooking(e) {
+            e.preventDefault();
+            // Simulation: Update UI to "Booked"
+            if(currentSlotRef) {
+                currentSlotRef.classList.remove('avail');
+                currentSlotRef.classList.add('booked');
+                currentSlotRef.removeAttribute('onclick');
+                // Recalculate stats
+                let stat = document.getElementById('stat-slots');
+                stat.innerText = parseInt(stat.innerText) - 1;
+            }
+            alert('การจองสำเร็จ! ระบบบันทึกข้อมูลลงแฟ้ม D3 เรียบร้อยแล้ว');
+            closeModal();
+        }
+
+        // Initialize
+        renderFields('all');
+
+        // Close modal on outside click
+        window.onclick = function(event) {
+            if (event.target == document.getElementById('bookingModal')) {
+                closeModal();
+            }
+        }
+    </script>
+</body>
+</html>
