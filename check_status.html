@@ -1,0 +1,282 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Check Status - THE ARENA</title>
+    <link href="https://fonts.googleapis.com/css2?family=Prompt:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+    <style>
+        /* --- CORE STYLES (Theme Consistency) --- */
+        :root {
+            --bg-dark: #0f0f0f;
+            --bg-panel: #1a1a1a;
+            --primary-gold: #c5a059;
+            --text-white: #ffffff;
+            --text-grey: #a0a0a0;
+            --success: #00ff88; /* สีเขียวสำหรับสถานะว่าง */
+            --error: #ff4d4d;   /* สีแดงสำหรับสถานะเต็ม */
+            --glass: rgba(20, 20, 20, 0.9);
+            --border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Prompt', sans-serif; }
+        body { background-color: var(--bg-dark); color: var(--text-white); overflow-x: hidden; padding-top: 80px; }
+
+        /* NAVBAR */
+        .navbar {
+            position: fixed; top: 0; width: 100%; height: 80px;
+            display: flex; justify-content: space-between; align-items: center;
+            padding: 0 5%; background: var(--glass); backdrop-filter: blur(10px);
+            z-index: 1000; border-bottom: var(--border);
+        }
+        .logo { font-size: 1.8rem; font-weight: 700; color: var(--text-white); letter-spacing: 1px; }
+        .logo span { color: var(--primary-gold); }
+        .nav-links { display: flex; gap: 30px; }
+        .nav-links a { text-decoration: none; color: var(--text-grey); transition: 0.3s; }
+        .nav-links a:hover, .nav-links a.active { color: var(--primary-gold); }
+
+        /* --- CHECK SECTION --- */
+        .container { max-width: 800px; margin: 50px auto; padding: 0 20px; }
+        
+        .card {
+            background: var(--bg-panel);
+            border-radius: 20px;
+            padding: 40px;
+            border: var(--border);
+            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+        }
+
+        .section-title { text-align: center; margin-bottom: 30px; font-size: 1.8rem; }
+        .section-title span { color: var(--primary-gold); }
+
+        /* Form Grid */
+        .search-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+
+        .form-group label { display: block; margin-bottom: 8px; color: var(--text-grey); font-size: 0.9rem; }
+        .form-select {
+            width: 100%; padding: 12px; background: #0f0f0f; border: 1px solid #333;
+            color: #fff; border-radius: 8px; cursor: pointer; outline: none;
+        }
+        .form-select:focus { border-color: var(--primary-gold); }
+
+        .btn-check {
+            width: 100%; padding: 15px; background: var(--primary-gold); color: #000;
+            border: none; border-radius: 10px; font-weight: bold; font-size: 1rem;
+            cursor: pointer; transition: 0.3s;
+        }
+        .btn-check:hover { filter: brightness(1.1); transform: translateY(-2px); }
+
+        /* --- RESULT BOX (Dynamic) --- */
+        .result-box {
+            margin-top: 30px;
+            padding: 20px;
+            border-radius: 15px;
+            display: none; /* Hidden by default */
+            text-align: center;
+            animation: slideUp 0.4s ease;
+        }
+
+        @keyframes slideUp { from {opacity:0; transform: translateY(20px);} to {opacity:1; transform: translateY(0);} }
+
+        /* Case: AVAILABLE (Green) */
+        .result-box.available {
+            background: rgba(0, 255, 136, 0.1);
+            border: 1px solid var(--success);
+        }
+        .status-text.green { color: var(--success); font-size: 1.5rem; font-weight: bold; margin-bottom: 10px; }
+        .status-icon.green { color: var(--success); font-size: 3rem; margin-bottom: 10px; }
+
+        /* Case: FULL (Red) */
+        .result-box.full {
+            background: rgba(255, 77, 77, 0.1);
+            border: 1px solid var(--error);
+        }
+        .status-text.red { color: var(--error); font-size: 1.5rem; font-weight: bold; margin-bottom: 10px; }
+        .status-icon.red { color: var(--error); font-size: 3rem; margin-bottom: 10px; }
+
+        .btn-confirm-booking {
+            background: var(--success); color: #000;
+            padding: 10px 30px; border: none; border-radius: 50px;
+            font-weight: bold; cursor: pointer; margin-top: 15px;
+            transition: 0.3s; display: inline-block;
+        }
+        .btn-confirm-booking:hover { box-shadow: 0 0 15px rgba(0, 255, 136, 0.5); }
+
+        /* --- HISTORY TABLE --- */
+        .history-section { margin-top: 60px; }
+        .history-table { width: 100%; border-collapse: collapse; margin-top: 20px; }
+        .history-table th { text-align: left; color: var(--text-grey); padding: 15px; border-bottom: 1px solid #333; }
+        .history-table td { padding: 15px; border-bottom: 1px solid #222; }
+        .status-badge {
+            padding: 5px 12px; border-radius: 20px; font-size: 0.8rem; display: inline-block;
+        }
+        .status-badge.pending { background: rgba(197, 160, 89, 0.2); color: var(--primary-gold); }
+        .status-badge.confirmed { background: rgba(0, 255, 136, 0.2); color: var(--success); }
+
+    </style>
+</head>
+<body>
+
+    <nav class="navbar">
+        <div class="logo">
+            <i class="fa-solid fa-futbol"></i> THE ARENA <span>.FC</span>
+        </div>
+        <div class="nav-links">
+            <a href="index.html">หน้าหลัก</a>
+            <a href="booking.html">จองสนาม</a>
+            <a href="check_status.html" class="active">ตรวจสอบสถานะ</a>
+        </div>
+    </nav>
+
+    <div class="container">
+        <div class="card">
+            <h2 class="section-title">ตรวจสอบสถานะสนาม <br><span>CHECK AVAILABILITY</span></h2>
+            
+            <form id="checkForm" onsubmit="checkStatus(event)">
+                <div class="search-grid">
+                    <div class="form-group">
+                        <label>เลือกสนาม (Field)</label>
+                        <select id="fieldSelect" class="form-select">
+                            <option value="A">Arena A (VIP 7P)</option>
+                            <option value="B">Arena B (Standard 7P)</option>
+                            <option value="C">Stadium C (Pro 11P)</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>เลือกวันที่ (Date)</label>
+                        <input type="date" id="dateSelect" class="form-select" style="color-scheme: dark;">
+                    </div>
+                    <div class="form-group">
+                        <label>เลือกเวลา (Time)</label>
+                        <select id="timeSelect" class="form-select">
+                            <option value="17:00">17:00 - 18:00</option>
+                            <option value="18:00">18:00 - 19:00</option>
+                            <option value="19:00">19:00 - 20:00</option>
+                            <option value="20:00">20:00 - 21:00</option>
+                        </select>
+                    </div>
+                </div>
+                <button type="submit" class="btn-check"><i class="fa-solid fa-magnifying-glass"></i> ตรวจสอบสถานะ</button>
+            </form>
+
+            <div id="resultArea"></div>
+        </div>
+
+        <div class="history-section">
+            <h3 style="border-left: 4px solid var(--primary-gold); padding-left: 15px;">ประวัติการจองของฉัน (My Booking History)</h3>
+            <table class="history-table">
+                <thead>
+                    <tr>
+                        <th>Booking ID</th>
+                        <th>สนาม</th>
+                        <th>วัน-เวลา</th>
+                        <th>สถานะ</th>
+                    </tr>
+                </thead>
+                <tbody id="historyBody">
+                    <tr>
+                        <td>#B0014</td>
+                        <td>Arena A</td>
+                        <td>12/10/2023 | 18:00</td>
+                        <td><span class="status-badge confirmed">Confirmed</span></td>
+                    </tr>
+                    <tr>
+                        <td>#B0015</td>
+                        <td>Arena B</td>
+                        <td>14/10/2023 | 20:00</td>
+                        <td><span class="status-badge pending">Pending Payment</span></td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <script>
+        // --- 1. MOCK DATA (จำลองข้อมูลการจองในระบบ) ---
+        // สมมติว่านี่คือข้อมูลที่มีคนจองไว้แล้ว
+        const bookedData = [
+            { field: 'A', date: '2023-10-25', time: '18:00' }, // ตัวอย่าง: สนาม A ไม่ว่างวันนี้
+            { field: 'A', date: '2023-10-25', time: '19:00' },
+            { field: 'C', date: '2023-10-25', time: '20:00' }
+        ];
+
+        // Set default date to today
+        document.getElementById('dateSelect').valueAsDate = new Date();
+
+        // --- 2. CHECK LOGIC ---
+        function checkStatus(e) {
+            e.preventDefault();
+
+            // รับค่าจาก Form
+            const field = document.getElementById('fieldSelect').value;
+            const date = document.getElementById('dateSelect').value; // yyyy-mm-dd
+            const time = document.getElementById('timeSelect').value;
+            const resultDiv = document.getElementById('resultArea');
+
+            // จำลองการ Loading นิดหน่อย
+            resultDiv.style.display = 'block';
+            resultDiv.innerHTML = '<p style="color:#aaa;"><i class="fa-solid fa-circle-notch fa-spin"></i> กำลังตรวจสอบข้อมูล...</p>';
+            resultDiv.className = 'result-box'; // Reset class
+
+            setTimeout(() => {
+                // Logic: ตรวจสอบว่าตรงกับ Mock Data หรือไม่ (ในระบบจริงต้องยิง API)
+                // เพื่อการทดสอบ: สมมติว่าถ้าเลือกเวลา "19:00" จะไม่ว่างเสมอ (สำหรับการ demo)
+                // หรือเช็คจาก bookedData ข้างบน (แต่ demo ง่ายๆ คือสุ่มเอาหรือล็อคค่า)
+                
+                // *** เงื่อนไข Demo *** : ถ้าเลือก 19:00 ให้ขึ้นสีแดง (เต็ม), เวลาอื่นให้เขียว (ว่าง)
+                const isFull = time === '19:00' || time === '20:00'; 
+
+                if (isFull) {
+                    // --- CASE RED: FIELD FULL ---
+                    resultDiv.className = 'result-box full';
+                    resultDiv.innerHTML = `
+                        <div class="status-icon red"><i class="fa-solid fa-lock"></i></div>
+                        <div class="status-text red">สนามเต็ม (Fully Booked)</div>
+                        <p style="color:var(--text-grey)">ขออภัย! รอบเวลา ${time} ของสนามนี้มีผู้จองแล้ว</p>
+                    `;
+                } else {
+                    // --- CASE GREEN: AVAILABLE ---
+                    resultDiv.className = 'result-box available';
+                    resultDiv.innerHTML = `
+                        <div class="status-icon green"><i class="fa-regular fa-circle-check"></i></div>
+                        <div class="status-text green">สนามว่าง (Available)</div>
+                        <p style="color:var(--text-grey)">สนามพร้อมให้บริการในเวลา ${time}</p>
+                        <button class="btn-confirm-booking" onclick="confirmThis('${field}', '${date}', '${time}')">
+                            <i class="fa-solid fa-check"></i> ยืนยันจองสนามนี้
+                        </button>
+                    `;
+                }
+            }, 800); // Delay 0.8s
+        }
+
+        // --- 3. CONFIRM ACTION ---
+        function confirmThis(f, d, t) {
+            const confirmMsg = confirm(`ยืนยันการจอง\nสนาม: ${f}\nวันที่: ${d}\nเวลา: ${t}`);
+            if(confirmMsg) {
+                // เพิ่มข้อมูลลงในตารางประวัติ (History) ด้านล่างทันที
+                const tbody = document.getElementById('historyBody');
+                const newRow = `
+                    <tr style="animation: fadeIn 0.5s">
+                        <td style="color:var(--primary-gold)">#NEW${Math.floor(Math.random()*1000)}</td>
+                        <td>Arena ${f}</td>
+                        <td>${d} | ${t}</td>
+                        <td><span class="status-badge confirmed">Confirmed</span></td>
+                    </tr>
+                `;
+                tbody.innerHTML = newRow + tbody.innerHTML; // แทรกบนสุด
+
+                // แจ้งเตือนและรีเซ็ต
+                alert('จองสำเร็จ! (Booking Confirmed)');
+                document.getElementById('resultArea').style.display = 'none'; // ซ่อนผลลัพธ์
+            }
+        }
+    </script>
+</body>
+</html>
