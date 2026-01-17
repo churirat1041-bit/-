@@ -1,0 +1,255 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login / Sign Up - THE ARENA</title>
+    <link href="https://fonts.googleapis.com/css2?family=Prompt:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+    <style>
+        /* --- CORE STYLES --- */
+        :root {
+            --bg-dark: #0f0f0f;
+            --bg-panel: #1a1a1a;
+            --primary-gold: #c5a059;
+            --text-white: #ffffff;
+            --text-grey: #a0a0a0;
+            --glass: rgba(20, 20, 20, 0.9);
+            --border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Prompt', sans-serif; }
+        body { 
+            background-color: var(--bg-dark); 
+            background-image: linear-gradient(rgba(0,0,0,0.7), rgba(0,0,0,0.9)), url('https://images.unsplash.com/photo-1510051640316-544215e1ae36?q=80&w=2070');
+            background-size: cover;
+            background-position: center;
+            color: var(--text-white); 
+            height: 100vh;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* NAVBAR */
+        .navbar {
+            height: 80px; width: 100%;
+            display: flex; justify-content: space-between; align-items: center;
+            padding: 0 5%; background: var(--glass); backdrop-filter: blur(10px);
+            z-index: 1000; border-bottom: var(--border); position: fixed; top: 0;
+        }
+        .logo { font-size: 1.8rem; font-weight: 700; color: var(--text-white); letter-spacing: 1px; }
+        .logo span { color: var(--primary-gold); }
+        .nav-links { display: flex; gap: 30px; }
+        .nav-links a { text-decoration: none; color: var(--text-grey); transition: 0.3s; }
+        .nav-links a:hover { color: var(--primary-gold); }
+
+        /* --- LOGIN CONTAINER --- */
+        .main-container {
+            flex: 1;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding-top: 80px; /* Offset Navbar */
+        }
+
+        .auth-box {
+            background: rgba(26, 26, 26, 0.95);
+            width: 450px;
+            padding: 40px;
+            border-radius: 20px;
+            border: 1px solid var(--primary-gold);
+            box-shadow: 0 0 40px rgba(0,0,0,0.8);
+            position: relative;
+            backdrop-filter: blur(10px);
+        }
+
+        /* Toggle Tabs */
+        .auth-tabs {
+            display: flex;
+            justify-content: center;
+            margin-bottom: 30px;
+            border-bottom: 1px solid #333;
+        }
+        .tab-btn {
+            background: none; border: none;
+            color: var(--text-grey);
+            padding: 10px 20px;
+            font-size: 1.1rem;
+            cursor: pointer;
+            border-bottom: 2px solid transparent;
+            transition: 0.3s;
+        }
+        .tab-btn.active {
+            color: var(--primary-gold);
+            border-bottom-color: var(--primary-gold);
+            font-weight: bold;
+        }
+
+        /* Form Elements */
+        .form-group { margin-bottom: 20px; }
+        .input-field {
+            width: 100%; padding: 15px;
+            background: #0f0f0f; border: 1px solid #333;
+            color: #fff; border-radius: 10px; font-size: 1rem;
+        }
+        .input-field:focus { outline: none; border-color: var(--primary-gold); }
+
+        .btn-main {
+            width: 100%; padding: 15px;
+            background: var(--primary-gold); color: #000;
+            border: none; border-radius: 10px;
+            font-weight: bold; font-size: 1.1rem;
+            cursor: pointer; transition: 0.3s;
+            margin-bottom: 15px;
+        }
+        .btn-main:hover { filter: brightness(1.1); }
+
+        .btn-google {
+            width: 100%; padding: 15px;
+            background: #fff; color: #333;
+            border: none; border-radius: 10px;
+            font-weight: bold; font-size: 1rem;
+            cursor: pointer; display: flex;
+            justify-content: center; align-items: center; gap: 10px;
+            transition: 0.3s;
+        }
+        .btn-google:hover { background: #f1f1f1; }
+
+        .separator {
+            text-align: center; color: var(--text-grey);
+            margin: 20px 0; font-size: 0.9rem; position: relative;
+        }
+        .separator::before, .separator::after {
+            content: ''; position: absolute; top: 50%; width: 40%; height: 1px; background: #333;
+        }
+        .separator::before { left: 0; }
+        .separator::after { right: 0; }
+
+        /* Animation Classes */
+        .form-section { display: none; animation: fadeIn 0.5s; }
+        .form-section.active { display: block; }
+        @keyframes fadeIn { from {opacity: 0;} to {opacity: 1;} }
+
+    </style>
+</head>
+<body>
+
+    <nav class="navbar">
+        <div class="logo"><i class="fa-solid fa-futbol"></i> THE ARENA <span>.FC</span></div>
+        <div class="nav-links">
+            <a href="index.html">กลับหน้าหลัก (Home)</a>
+        </div>
+    </nav>
+
+    <div class="main-container">
+        <div class="auth-box">
+            <div class="auth-tabs">
+                <button class="tab-btn active" onclick="switchTab('login')">เข้าสู่ระบบ</button>
+                <button class="tab-btn" onclick="switchTab('signup')">สมัครสมาชิก</button>
+            </div>
+
+            <div id="loginForm" class="form-section active">
+                <form onsubmit="handleLogin(event)">
+                    <div class="form-group">
+                        <input type="email" id="loginEmail" class="input-field" placeholder="อีเมล (Email)" required>
+                    </div>
+                    <div class="form-group">
+                        <input type="password" class="input-field" placeholder="รหัสผ่าน (Password)" required>
+                    </div>
+                    <button type="submit" class="btn-main">เข้าสู่ระบบ</button>
+                </form>
+            </div>
+
+            <div id="signupForm" class="form-section">
+                <form onsubmit="handleSignup(event)">
+                    <div class="form-group">
+                        <input type="text" id="signupName" class="input-field" placeholder="ชื่อ-นามสกุล (Full Name)" required>
+                    </div>
+                    <div class="form-group">
+                        <input type="email" class="input-field" placeholder="อีเมล (Email)" required>
+                    </div>
+                    <div class="form-group">
+                        <input type="password" class="input-field" placeholder="รหัสผ่าน (Password)" required>
+                    </div>
+                    <button type="submit" class="btn-main">สมัครสมาชิก</button>
+                </form>
+            </div>
+
+            <div class="separator">หรือ</div>
+
+            <button class="btn-google" onclick="handleGoogleLogin()">
+                <i class="fa-brands fa-google" style="color: #DB4437;"></i> ดำเนินการต่อด้วย Google
+            </button>
+        </div>
+    </div>
+
+    <script>
+        // 1. Switch Tabs
+        function switchTab(tab) {
+            document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+            document.querySelectorAll('.form-section').forEach(f => f.classList.remove('active'));
+
+            if(tab === 'login') {
+                document.querySelectorAll('.tab-btn')[0].classList.add('active');
+                document.getElementById('loginForm').classList.add('active');
+            } else {
+                document.querySelectorAll('.tab-btn')[1].classList.add('active');
+                document.getElementById('signupForm').classList.add('active');
+            }
+        }
+
+        // 2. Handle Login (Manual)
+        function handleLogin(e) {
+            e.preventDefault();
+            const email = document.getElementById('loginEmail').value;
+            // จำลองชื่อ User จากอีเมล (ตัดส่วนหน้า @ มาใช้)
+            const mockName = email.split('@')[0];
+            
+            saveSession(mockName, email);
+        }
+
+        // 3. Handle Signup
+        function handleSignup(e) {
+            e.preventDefault();
+            const name = document.getElementById('signupName').value;
+            
+            saveSession(name, 'user@example.com');
+        }
+
+        // 4. Handle Google Login (Simulation)
+        function handleGoogleLogin() {
+            // จำลอง Delay เหมือนติดต่อ Google
+            const btn = document.querySelector('.btn-google');
+            btn.innerHTML = '<i class="fa-solid fa-circle-notch fa-spin"></i> Connecting...';
+            
+            setTimeout(() => {
+                saveSession('Google User', 'google@gmail.com');
+            }, 1500);
+        }
+
+        // 5. Save Session & Redirect
+        function saveSession(name, email) {
+            const user = {
+                name: name,
+                email: email,
+                isLoggedIn: true,
+                avatar: 'https://ui-avatars.com/api/?name=' + name + '&background=c5a059&color=fff'
+            };
+
+            // บันทึกลง LocalStorage (ตัวแปรนี้จะอยู่ถาวรจนกว่าจะ Logout)
+            localStorage.setItem('currentUser', JSON.stringify(user));
+
+            alert('เข้าสู่ระบบสำเร็จ! ยินดีต้อนรับคุณ ' + name);
+            window.location.href = 'index.html'; // กลับหน้าหลัก
+        }
+
+        // Check if already logged in
+        if(localStorage.getItem('currentUser')) {
+            // ถ้ามี Login อยู่แล้ว ให้เด้งไปหน้า index เลย
+            window.location.href = 'index.html';
+        }
+    </script>
+</body>
+</html>
