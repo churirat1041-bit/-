@@ -1,0 +1,388 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Booking - THE ARENA</title>
+    <link href="https://fonts.googleapis.com/css2?family=Prompt:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+    <style>
+        /* --- COPY OF CORE STYLES (Keep Consistency) --- */
+        :root {
+            --bg-dark: #0f0f0f;
+            --bg-panel: #1a1a1a;
+            --primary-gold: #c5a059;
+            --primary-gold-hover: #e6c885;
+            --text-white: #ffffff;
+            --text-grey: #a0a0a0;
+            --success: #00ff88;
+            --error: #ff4d4d;
+            --glass: rgba(20, 20, 20, 0.9);
+            --border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Prompt', sans-serif; }
+        body { background-color: var(--bg-dark); color: var(--text-white); overflow-x: hidden; padding-top: 80px; }
+
+        /* NAVBAR */
+        .navbar {
+            position: fixed; top: 0; width: 100%; height: 80px;
+            display: flex; justify-content: space-between; align-items: center;
+            padding: 0 5%; background: var(--glass); backdrop-filter: blur(10px);
+            z-index: 1000; border-bottom: var(--border);
+        }
+        .logo { font-size: 1.8rem; font-weight: 700; color: var(--text-white); letter-spacing: 1px; }
+        .logo span { color: var(--primary-gold); }
+        .nav-links { display: flex; gap: 30px; }
+        .nav-links a { text-decoration: none; color: var(--text-grey); transition: 0.3s; }
+        .nav-links a:hover, .nav-links a.active { color: var(--primary-gold); }
+
+        /* --- NEW: DATE SELECTOR --- */
+        .date-section {
+            padding: 40px 5%;
+            text-align: center;
+            background: linear-gradient(to bottom, #151515, var(--bg-dark));
+        }
+        .date-scroller {
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+            margin-top: 20px;
+            flex-wrap: wrap;
+        }
+        .date-card {
+            background: var(--bg-panel);
+            border: var(--border);
+            padding: 15px 25px;
+            border-radius: 15px;
+            cursor: pointer;
+            text-align: center;
+            min-width: 100px;
+            transition: 0.3s;
+        }
+        .date-card:hover, .date-card.active {
+            background: var(--primary-gold);
+            color: #000;
+            transform: translateY(-5px);
+            box-shadow: 0 5px 15px rgba(197, 160, 89, 0.3);
+        }
+        .date-card span { display: block; font-size: 0.8rem; opacity: 0.8; }
+        .date-card strong { font-size: 1.5rem; display: block; }
+
+        /* --- FIELDS GRID (Reused) --- */
+        .container { max-width: 1200px; margin: 0 auto 100px; padding: 0 20px; }
+        .section-header { margin: 40px 0; border-left: 5px solid var(--primary-gold); padding-left: 20px; }
+        .fields-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(350px, 1fr)); gap: 30px; }
+        
+        .field-card {
+            background: var(--bg-panel); border-radius: 20px; overflow: hidden;
+            border: var(--border); transition: 0.3s;
+        }
+        .field-card:hover { border-color: var(--primary-gold); transform: translateY(-5px); }
+        .field-img { height: 180px; background-size: cover; background-position: center; position: relative; }
+        .field-body { padding: 25px; }
+        .field-title { font-size: 1.3rem; margin-bottom: 5px; color: var(--text-white); }
+        
+        .slots-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-top: 15px; }
+        .slot-btn {
+            background: #252525; border: 1px solid #333; color: #fff;
+            padding: 8px; border-radius: 8px; font-size: 0.9rem; cursor: pointer;
+            text-align: center; transition: 0.2s;
+        }
+        .slot-btn.avail:hover { background: rgba(197, 160, 89, 0.2); border-color: var(--primary-gold); }
+        .slot-btn.booked { background: #151515; color: #444; cursor: not-allowed; text-decoration: line-through; border-color: transparent; }
+        .slot-price { display: block; font-size: 0.7rem; color: var(--text-grey); margin-top: 2px; }
+
+        /* --- MODALS --- */
+        .modal-overlay {
+            display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.9); z-index: 2000; justify-content: center; align-items: center;
+            backdrop-filter: blur(5px);
+        }
+        .modal-box {
+            background: #1a1a1a; width: 90%; max-width: 450px; padding: 30px;
+            border-radius: 20px; border: 1px solid var(--primary-gold); position: relative;
+            animation: fadeIn 0.3s ease;
+        }
+        @keyframes fadeIn { from {opacity: 0; transform: translateY(20px);} to {opacity: 1; transform: translateY(0);} }
+
+        .form-input {
+            width: 100%; padding: 12px; background: #0f0f0f; border: 1px solid #333;
+            color: #fff; border-radius: 8px; margin-bottom: 15px;
+        }
+        .btn-submit {
+            width: 100%; padding: 12px; background: var(--primary-gold); color: #000;
+            border: none; border-radius: 8px; font-weight: bold; cursor: pointer;
+        }
+
+        /* --- TICKET SUCCESS STYLE (New Feature) --- */
+        .ticket {
+            background: #fff; color: #000; border-radius: 15px; overflow: hidden;
+            position: relative; box-shadow: 0 0 30px rgba(197, 160, 89, 0.5);
+            max-width: 350px; width: 100%;
+        }
+        .ticket-header { background: var(--primary-gold); padding: 20px; text-align: center; }
+        .ticket-header h2 { margin: 0; font-size: 1.5rem; text-transform: uppercase; }
+        .ticket-body { padding: 25px; }
+        .ticket-row { display: flex; justify-content: space-between; margin-bottom: 10px; border-bottom: 1px dashed #ccc; padding-bottom: 10px; }
+        .ticket-row span:first-child { color: #666; font-size: 0.9rem; }
+        .ticket-row span:last-child { font-weight: bold; font-size: 1rem; }
+        .ticket-status { 
+            text-align: center; margin-top: 20px; padding: 10px; 
+            background: #e8f5e9; color: #2e7d32; border-radius: 8px; font-weight: bold;
+        }
+        .loading-spinner {
+            border: 4px solid #333; border-top: 4px solid var(--primary-gold);
+            border-radius: 50%; width: 40px; height: 40px; animation: spin 1s linear infinite;
+            margin: 20px auto; display: none;
+        }
+        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+
+    </style>
+</head>
+<body>
+
+    <nav class="navbar">
+        <div class="logo">
+            <i class="fa-solid fa-futbol"></i> THE ARENA <span>.FC</span>
+        </div>
+        <div class="nav-links">
+            <a href="index.html">หน้าหลัก</a>
+            <a href="booking.html" class="active">จองสนาม</a>
+            <a href="#">ประวัติการจอง</a>
+        </div>
+    </nav>
+
+    <section class="date-section">
+        <h2 style="color: var(--text-grey); font-weight: 300;">เลือกวันที่ต้องการใช้บริการ</h2>
+        <div class="date-scroller" id="date-container">
+            </div>
+    </section>
+
+    <div class="container">
+        <div class="section-header">
+            <h2>Available Fields</h2>
+            <p style="color: var(--text-grey);">ตารางสนามว่างประจำวันที่ <span id="selected-date-display" style="color:var(--primary-gold)">...</span></p>
+        </div>
+
+        <div class="fields-grid" id="fields-container">
+            </div>
+    </div>
+
+    <div class="modal-overlay" id="inputModal">
+        <div class="modal-box">
+            <h3 style="color: var(--primary-gold); margin-bottom: 15px;">ยืนยันการจอง</h3>
+            <p style="color: #aaa; font-size: 0.9rem; margin-bottom: 20px;">กรุณากรอกข้อมูลเพื่อออกใบจอง (E-Ticket)</p>
+            
+            <form onsubmit="processBooking(event)">
+                <label style="color:#fff; font-size:0.9rem;">ชื่อผู้จอง</label>
+                <input type="text" id="userName" class="form-input" placeholder="สมชาย ใจดี" required>
+                
+                <label style="color:#fff; font-size:0.9rem;">เบอร์โทรศัพท์</label>
+                <input type="tel" id="userPhone" class="form-input" placeholder="08x-xxx-xxxx" required>
+                
+                <button type="submit" class="btn-submit">ยืนยันและชำระเงิน</button>
+            </form>
+        </div>
+    </div>
+
+    <div class="modal-overlay" id="ticketModal">
+        <div id="loadingUI" style="text-align: center;">
+            <div class="loading-spinner" style="display:block;"></div>
+            <p>กำลังบันทึกข้อมูลและออกตั๋ว...</p>
+        </div>
+
+        <div class="ticket" id="ticketUI" style="display: none;">
+            <div class="ticket-header">
+                <i class="fa-solid fa-check-circle fa-2x"></i>
+                <h2>Booking Confirmed</h2>
+            </div>
+            <div class="ticket-body">
+                <div class="ticket-row">
+                    <span>Booking ID</span>
+                    <span id="t-id">#A8823</span>
+                </div>
+                <div class="ticket-row">
+                    <span>Name</span>
+                    <span id="t-name">-</span>
+                </div>
+                <div class="ticket-row">
+                    <span>Field</span>
+                    <span id="t-field">-</span>
+                </div>
+                <div class="ticket-row">
+                    <span>Date</span>
+                    <span id="t-date">-</span>
+                </div>
+                <div class="ticket-row">
+                    <span>Time</span>
+                    <span id="t-time">-</span>
+                </div>
+                <div class="ticket-row">
+                    <span>Price</span>
+                    <span id="t-price" style="color: #d4af37;">-</span>
+                </div>
+                
+                <div class="ticket-status">
+                    PAYMENT PENDING
+                </div>
+                <button onclick="closeTicket()" style="width:100%; margin-top:15px; padding:10px; background:#333; color:#fff; border:none; border-radius:5px; cursor:pointer;">ปิดหน้าต่าง</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // --- DATA & STATE ---
+        const fields = [
+            { id: 'F1', name: 'Arena A (VIP 7P)', img: 'https://images.unsplash.com/photo-1529900748604-07564a03e7a6?w=600' },
+            { id: 'F2', name: 'Arena B (Standard 7P)', img: 'https://images.unsplash.com/photo-1518605348400-43ded97c9c3c?w=600' },
+            { id: 'F3', name: 'Stadium C (Pro 11P)', img: 'https://images.unsplash.com/photo-1556056504-5c7696c4c28d?w=600' }
+        ];
+
+        const times = ['17:00', '18:00', '19:00', '20:00', '21:00'];
+        
+        // เก็บข้อมูลการจอง (สมมติว่าเป็น Database)
+        let bookedSlots = []; 
+        let selectedData = {}; // เก็บข้อมูลชั่วคราวขณะกดจอง
+
+        // --- 1. INITIALIZE DATES ---
+        function initDates() {
+            const container = document.getElementById('date-container');
+            const today = new Date();
+            const days = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+
+            for (let i = 0; i < 5; i++) {
+                let d = new Date(today);
+                d.setDate(today.getDate() + i);
+                
+                let dayName = days[d.getDay()];
+                let dayNum = d.getDate();
+                let fullDate = d.toLocaleDateString('th-TH');
+
+                let activeClass = i === 0 ? 'active' : ''; // เลือกวันแรกเสมอ
+                
+                let html = `
+                    <div class="date-card ${activeClass}" onclick="selectDate(this, '${fullDate}')">
+                        <span>${dayName}</span>
+                        <strong>${dayNum}</strong>
+                    </div>
+                `;
+                container.innerHTML += html;
+                
+                if(i===0) document.getElementById('selected-date-display').innerText = fullDate;
+            }
+        }
+
+        function selectDate(el, dateString) {
+            document.querySelectorAll('.date-card').forEach(c => c.classList.remove('active'));
+            el.classList.add('active');
+            document.getElementById('selected-date-display').innerText = dateString;
+            // ในระบบจริงต้อง Reload ข้อมูลสนามใหม่ตามวันที่
+            renderFields(dateString); 
+        }
+
+        // --- 2. RENDER FIELDS ---
+        function renderFields(dateStr) {
+            const container = document.getElementById('fields-container');
+            container.innerHTML = '';
+
+            fields.forEach(field => {
+                let slotsHtml = '';
+                
+                times.forEach(time => {
+                    // สร้าง ID เฉพาะของ Slot เช่น "F1-15/10/2023-18:00"
+                    let slotId = `${field.id}-${dateStr}-${time}`;
+                    let isBooked = bookedSlots.includes(slotId);
+                    
+                    let btnClass = isBooked ? 'booked' : 'avail';
+                    let price = field.id === 'F3' ? 3500 : 1200;
+                    let clickAction = isBooked ? '' : `onclick="openInputModal('${field.name}', '${dateStr}', '${time}', ${price}, '${slotId}')"`;
+
+                    slotsHtml += `
+                        <div class="slot-btn ${btnClass}" ${clickAction}>
+                            ${time}
+                            <span class="slot-price">฿${price}</span>
+                        </div>
+                    `;
+                });
+
+                container.innerHTML += `
+                    <div class="field-card">
+                        <div class="field-img" style="background-image: url('${field.img}');"></div>
+                        <div class="field-body">
+                            <h3 class="field-title">${field.name}</h3>
+                            <div class="slots-grid">${slotsHtml}</div>
+                        </div>
+                    </div>
+                `;
+            });
+        }
+
+        // --- 3. BOOKING LOGIC ---
+        
+        // Step 1: User Clicks Slot -> Open Form
+        function openInputModal(fname, date, time, price, slotId) {
+            selectedData = { fname, date, time, price, slotId }; // Save temp
+            document.getElementById('inputModal').style.display = 'flex';
+        }
+
+        // Step 2: User Submits Form -> Process
+        function processBooking(e) {
+            e.preventDefault();
+            const name = document.getElementById('userName').value;
+            const phone = document.getElementById('userPhone').value;
+
+            // Close Input Modal
+            document.getElementById('inputModal').style.display = 'none';
+            
+            // Open Loading/Ticket Modal
+            const ticketModal = document.getElementById('ticketModal');
+            ticketModal.style.display = 'flex';
+            document.getElementById('loadingUI').style.display = 'block';
+            document.getElementById('ticketUI').style.display = 'none';
+
+            // Simulate Server Delay (1.5 seconds)
+            setTimeout(() => {
+                // Save to "Database" (Array)
+                bookedSlots.push(selectedData.slotId);
+
+                // Update Ticket UI
+                document.getElementById('t-id').innerText = '#' + Math.floor(Math.random()*90000 + 10000);
+                document.getElementById('t-name').innerText = name;
+                document.getElementById('t-field').innerText = selectedData.fname;
+                document.getElementById('t-date').innerText = selectedData.date;
+                document.getElementById('t-time').innerText = selectedData.time;
+                document.getElementById('t-price').innerText = '฿' + selectedData.price.toLocaleString();
+
+                // Switch to Ticket View
+                document.getElementById('loadingUI').style.display = 'none';
+                document.getElementById('ticketUI').style.display = 'block';
+
+                // Re-render grid to show "Booked" status
+                renderFields(selectedData.date);
+
+            }, 1500);
+        }
+
+        function closeTicket() {
+            document.getElementById('ticketModal').style.display = 'none';
+            // Reset Form
+            document.getElementById('userName').value = '';
+            document.getElementById('userPhone').value = '';
+        }
+
+        // Init
+        const todayStr = new Date().toLocaleDateString('th-TH');
+        initDates();
+        renderFields(todayStr);
+
+        // Close on outside click
+        window.onclick = function(event) {
+            if (event.target == document.getElementById('inputModal')) {
+                document.getElementById('inputModal').style.display = 'none';
+            }
+        }
+    </script>
+</body>
+</html>
